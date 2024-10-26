@@ -57,6 +57,8 @@ http://192.168.50.1:7000/rtp/239.3.1.219:4220
 http://192.168.50.1:7000/rtp/239.3.1.220:4220
 #EXTINF:-1 tvg-id="30" tvg-name="北京卫视" tvg-logo="https://live.fanmingming.com/tv/北京卫视.png" group-title="卫视",BTV北京卫视 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.241:8000
+#EXTINF:-1 tvg-id="7245" tvg-name="北京IPTV4K" tvg-logo="https://live.fanmingming.com/tv/北京IPTV4K.png" group-title="地方",北京IPTV [4K HDR]
+http://192.168.50.1:7000/rtp/239.3.1.249:8001
 #EXTINF:-1 tvg-id="1880" tvg-name="BTV新闻" tvg-logo="https://live.fanmingming.com/tv/北京新闻.png" group-title="卫视",BTV新闻 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.159:8000
 #EXTINF:-1 tvg-id="1875" tvg-name="BTV影视" tvg-logo="https://live.fanmingming.com/tv/北京影视.png" group-title="卫视",BTV影视 [高清]
@@ -77,8 +79,6 @@ http://192.168.50.1:7000/rtp/239.3.1.235:8000
 http://192.168.50.1:7000/rtp/239.3.1.189:8000
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://live.fanmingming.com/tv/爱上4K.png" group-title="其他",爱上4K [4K]
 http://192.168.50.1:7000/rtp/239.3.1.236:2000
-#EXTINF:-1 tvg-id="7245" tvg-name="中国教育4台" tvg-logo="http://epg.51zmt.top:8000/tb1/qt/中国教育4台.png" group-title="地方",中国教育台 [4K HDR]
-http://192.168.50.1:7000/rtp/239.3.1.249:8001
 #EXTINF:-1 tvg-id="73" tvg-name="中国教育1台" tvg-logo="https://live.fanmingming.com/tv/CETV1.png" group-title="地方",CETV1 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.57:8152
 #EXTINF:-1 tvg-id="74" tvg-name="中国教育2台" tvg-logo="https://live.fanmingming.com/tv/CETV2.png" group-title="地方",CETV2
