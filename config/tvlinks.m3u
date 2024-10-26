@@ -81,28 +81,8 @@ http://192.168.50.1:7000/rtp/239.3.1.189:8000
 http://192.168.50.1:7000/rtp/239.3.1.236:2000
 #EXTINF:-1 tvg-id="73" tvg-name="中国教育1台" tvg-logo="https://live.fanmingming.com/tv/CETV1.png" group-title="地方",CETV1 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.57:8152
-#EXTINF:-1 tvg-id="74" tvg-name="中国教育2台" tvg-logo="https://live.fanmingming.com/tv/CETV2.png" group-title="地方",CETV2
-http://192.168.50.1:7000/rtp/239.3.1.54:4120
-#EXTINF:-1 tvg-id="75" tvg-name="中国教育3台" tvg-logo="https://live.fanmingming.com/tv/CETV3.png" group-title="地方",CETV3
-http://192.168.50.1:7000/rtp/239.3.1.55:4120
-#EXTINF:-1 tvg-id="7245" tvg-name="中国教育4台" tvg-logo="https://live.fanmingming.com/tv/CETV4.png" group-title="地方",CETV4
-http://192.168.50.1:7000/rtp/239.3.1.56:4120
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",淘电影 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.250:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",星影
-http://192.168.50.1:7000/rtp/239.3.1.94:4120
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",动作影院
-http://192.168.50.1:7000/rtp/239.3.1.92:4120
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",光影
-http://192.168.50.1:7000/rtp/239.3.1.84:4120
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",喜剧影院
-http://192.168.50.1:7000/rtp/239.3.1.91:4120
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",家庭影院
-http://192.168.50.1:7000/rtp/239.3.1.93:4120
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",精选
-http://192.168.50.1:7000/rtp/239.3.1.74:4120
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",经典电影
-http://192.168.50.1:7000/rtp/239.3.1.195:9024
 #EXTINF:-1 tvg-id="1988" tvg-name="上海纪实" tvg-logo="https://live.fanmingming.com/tv/纪实人文.png" group-title="上海",纪实人文 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.212:8060
 #EXTINF:-1 tvg-id="1981" tvg-name="生活时尚" tvg-logo="https://live.fanmingming.com/tv/生活时尚.png" group-title="上海",生活时尚 [高清]
@@ -209,11 +189,8 @@ http://192.168.50.1:7000/rtp/239.3.1.127:8001
 http://192.168.50.1:7000/rtp/239.3.1.128:8001
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",魅力足球 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.201:8001
-
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",淘精彩 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.178:8001
-
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",金色学堂 [高清]
 http://192.168.50.1:7000/rtp/239.3.1.208:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",热播剧场
-http://192.168.50.1:7000/rtp/239.3.1.194:9020
+
