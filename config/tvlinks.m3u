@@ -55,33 +55,33 @@ http://192.168.50.1:7000/rtp/239.3.1.218:4220
 http://192.168.50.1:7000/rtp/239.3.1.219:4220
 #EXTINF:-1 tvg-id="20" tvg-name="CGTN" tvg-logo="https://live.fanmingming.com/tv/CGTN俄语.png" group-title="央视",CGTN 俄语
 http://192.168.50.1:7000/rtp/239.3.1.220:4220
-#EXTINF:-1 tvg-id="30" tvg-name="北京卫视" tvg-logo="https://live.fanmingming.com/tv/北京卫视.png" group-title="卫视",BTV北京卫视
+#EXTINF:-1 tvg-id="30" tvg-name="北京卫视" tvg-logo="https://live.fanmingming.com/tv/北京卫视.png" group-title="地方",北京卫视
 http://192.168.50.1:7000/rtp/239.3.1.241:8000
 #EXTINF:-1 tvg-id="7245" tvg-name="北京IPTV4K" tvg-logo="https://live.fanmingming.com/tv/北京IPTV4K.png" group-title="地方",北京IPTV 4K
 http://192.168.50.1:7000/rtp/239.3.1.249:8001
-#EXTINF:-1 tvg-id="1880" tvg-name="BTV新闻" tvg-logo="https://live.fanmingming.com/tv/北京新闻.png" group-title="卫视",BTV新闻
+#EXTINF:-1 tvg-id="1880" tvg-name="BTV新闻" tvg-logo="https://live.fanmingming.com/tv/北京新闻.png" group-title="地方",BRTV新闻
 http://192.168.50.1:7000/rtp/239.3.1.159:8000
-#EXTINF:-1 tvg-id="1875" tvg-name="BTV影视" tvg-logo="https://live.fanmingming.com/tv/北京影视.png" group-title="卫视",BTV影视
+#EXTINF:-1 tvg-id="1875" tvg-name="BTV影视" tvg-logo="https://live.fanmingming.com/tv/北京影视.png" group-title="地方",BRTV影视
 http://192.168.50.1:7000/rtp/239.3.1.158:8000
-#EXTINF:-1 tvg-id="1873" tvg-name="BTV文艺" tvg-logo="https://live.fanmingming.com/tv/北京文艺.png" group-title="卫视",BTV文艺
+#EXTINF:-1 tvg-id="1873" tvg-name="BTV文艺" tvg-logo="https://live.fanmingming.com/tv/北京文艺.png" group-title="地方",BRTV文艺
 http://192.168.50.1:7000/rtp/239.3.1.242:8000
-#EXTINF:-1 tvg-id="1876" tvg-name="BTV财经" tvg-logo="https://live.fanmingming.com/tv/北京财经.png" group-title="卫视",BTV财经
+#EXTINF:-1 tvg-id="1876" tvg-name="BTV财经" tvg-logo="https://live.fanmingming.com/tv/北京财经.png" group-title="地方",BRTV财经
 http://192.168.50.1:7000/rtp/239.3.1.116:8000
-#EXTINF:-1 tvg-id="1878" tvg-name="BTV生活" tvg-logo="https://live.fanmingming.com/tv/北京生活.png" group-title="卫视",BTV生活
+#EXTINF:-1 tvg-id="1878" tvg-name="BTV生活" tvg-logo="https://live.fanmingming.com/tv/北京生活.png" group-title="地方",BRTV生活
 http://192.168.50.1:7000/rtp/239.3.1.117:8000
-#EXTINF:-1 tvg-id="1874" tvg-name="BTV科教" tvg-logo="https://live.fanmingming.com/tv/北京纪实科教.png" group-title="卫视",BTV科教
+#EXTINF:-1 tvg-id="1874" tvg-name="BTV科教" tvg-logo="https://live.fanmingming.com/tv/北京纪实科教.png" group-title="地方",BRTV科教
 http://192.168.50.1:7000/rtp/239.3.1.115:8000
-#EXTINF:-1 tvg-id="" tvg-name="BTV国际频道" tvg-logo="http://epg.51zmt.top:8000/tb1/sheng/BTV国际.png" group-title="卫视",BTV国际频道
+#EXTINF:-1 tvg-id="" tvg-name="BTV国际频道" tvg-logo="http://epg.51zmt.top:8000/tb1/sheng/BTV国际.png" group-title="地方",BRTV国际频道
 http://192.168.50.1:7000/rtp/239.3.1.235:8000
-#-#EXTINF:-1 tvg-id="1874" tvg-name="BTV体育" tvg-logo="https://live.fanmingming.com/tv/北京体育休闲.png" group-title="卫视",BTV体育 4K
+#-#EXTINF:-1 tvg-id="1874" tvg-name="BTV体育" tvg-logo="https://live.fanmingming.com/tv/北京体育休闲.png" group-title="地方",BRTV体育 4K
 #-http://192.168.50.1:7000/rtp/239.3.1.120:8000
-#EXTINF:-1 tvg-id="67" tvg-name="卡酷动画" tvg-logo="https://live.fanmingming.com/tv/kaku.png" group-title="卫视",BTV卡酷少儿
+#EXTINF:-1 tvg-id="67" tvg-name="卡酷动画" tvg-logo="https://live.fanmingming.com/tv/kaku.png" group-title="地方",BRTV卡酷少儿
 http://192.168.50.1:7000/rtp/239.3.1.189:8000
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://live.fanmingming.com/tv/爱上4K.png" group-title="其他",爱上4K
 http://192.168.50.1:7000/rtp/239.3.1.236:2000
-#EXTINF:-1 tvg-id="73" tvg-name="中国教育1台" tvg-logo="https://live.fanmingming.com/tv/CETV1.png" group-title="地方",CETV1
+#EXTINF:-1 tvg-id="73" tvg-name="中国教育1台" tvg-logo="https://live.fanmingming.com/tv/CETV1.png" group-title="地方",中国教育台
 http://192.168.50.1:7000/rtp/239.3.1.57:8152
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",淘电影
+#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="地方",淘电影
 http://192.168.50.1:7000/rtp/239.3.1.250:8001
 #EXTINF:-1 tvg-id="1988" tvg-name="上海纪实" tvg-logo="https://live.fanmingming.com/tv/纪实人文.png" group-title="上海",纪实人文
 http://192.168.50.1:7000/rtp/239.3.1.212:8060
