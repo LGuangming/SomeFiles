@@ -73,8 +73,8 @@ http://192.168.50.1:7000/rtp/239.3.1.117:8000
 http://192.168.50.1:7000/rtp/239.3.1.115:8000
 #EXTINF:-1 tvg-id="" tvg-name="BTV国际频道" tvg-logo="http://epg.51zmt.top:8000/tb1/sheng/BTV国际.png" group-title="北京",BRTV国际频道
 http://192.168.50.1:7000/rtp/239.3.1.235:8000
-#-#EXTINF:-1 tvg-id="1874" tvg-name="BTV体育" tvg-logo="https://live.fanmingming.cn/tv/北京体育休闲.png" group-title="北京",BRTV体育 4K
-#-http://192.168.50.1:7000/rtp/239.3.1.22:8001
+#EXTINF:-1 tvg-id="1874" tvg-name="BTV体育" tvg-logo="https://live.fanmingming.cn/tv/北京体育休闲.png" group-title="北京",BRTV体育 4K
+http://192.168.50.1:7000/rtp/239.3.1.22:8001
 #EXTINF:-1 tvg-id="67" tvg-name="卡酷动画" tvg-logo="https://live.fanmingming.cn/tv/kaku.png" group-title="北京",BRTV卡酷少儿
 http://192.168.50.1:7000/rtp/239.3.1.189:8000
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://live.fanmingming.cn/tv/爱上4K.png" group-title="其他",爱上4K
