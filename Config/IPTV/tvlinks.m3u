@@ -169,21 +169,3 @@ http://192.168.50.10:7000/rtp/239.3.1.154:8001
 http://192.168.50.10:7000/rtp/239.3.1.96:8001
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="北京",延庆电视台
 http://192.168.50.10:7000/rtp/239.3.1.187:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://live.fanmingming.cn/tv/法治天地.png" group-title="其他",法治天地
-http://192.168.50.10:7000/rtp/239.3.1.204:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",睛彩竞技
-http://192.168.50.10:7000/rtp/239.3.1.125:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",睛彩篮球
-http://192.168.50.10:7000/rtp/239.3.1.126:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",睛彩羽毛球
-http://192.168.50.10:7000/rtp/239.3.1.127:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",睛彩广场舞
-http://192.168.50.10:7000/rtp/239.3.1.128:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",魅力足球
-http://192.168.50.10:7000/rtp/239.3.1.201:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",淘精彩
-http://192.168.50.10:7000/rtp/239.3.1.178:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",金色学堂
-http://192.168.50.10:7000/rtp/239.3.1.208:8001
-#EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="其他",乐游
-http://192.168.50.10:7000/rtp/239.3.1.207:8001
