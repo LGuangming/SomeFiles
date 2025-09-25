@@ -35,6 +35,8 @@ http://192.168.50.10:7000/rtp/239.3.1.124:8128
 http://192.168.50.10:7000/rtp/239.3.1.65:8132
 #EXTINF:-1 tvg-id="16" tvg-name="CCTV15" tvg-logo="https://live.fanmingming.cn/tv/CCTV15.png" group-title="央视",CCTV-15 音乐
 http://192.168.50.10:7000/rtp/239.3.1.153:8136
+#EXTINF:-1 tvg-id="16" tvg-name="CCTV16" tvg-logo="https://live.fanmingming.cn/tv/CCTV16.png" group-title="央视",CCTV-16 奥林匹克
+http://192.168.50.10:7000/rtp/239.3.1.184:8001
 #EXTINF:-1 tvg-id="17" tvg-name="CCTV17" tvg-logo="https://live.fanmingming.cn/tv/CCTV17.png" group-title="央视",CCTV-17 农业
 http://192.168.50.10:7000/rtp/239.3.1.151:8144
 #EXTINF:-1 tvg-id="106" tvg-name="CCTV4K" tvg-logo="https://live.fanmingming.cn/tv/CCTV4K.png" group-title="央视",CCTV-4K
