@@ -105,12 +105,14 @@ http://192.168.50.10:5000/rtp/239.3.1.202:2000
 http://192.168.50.10:5000/rtp/239.3.1.203:2000
 #EXTINF:-1 tvg-id="32" tvg-name="安徽卫视" tvg-logo="https://live.fanmingming.cn/tv/anhui.png" group-title="卫视",安徽卫视
 http://192.168.50.10:5000/rtp/239.3.1.211:8064
+#EXTINF:-1 tvg-id="38" tvg-name="山东卫视" tvg-logo="https://live.fanmingming.cn/tv/shandong.png" group-title="卫视",山东卫视
+http://192.168.50.10:5000/rtp/239.3.1.144:3005
+#EXTINF:-1 tvg-id="56" tvg-name="四川卫视" tvg-logo="https://live.fanmingming.cn/tv/sichuan.png" group-title="卫视",四川卫视
+http://192.168.50.10:5000/rtp/239.3.1.131:3001
 #EXTINF:-1 tvg-id="39" tvg-name="天津卫视" tvg-logo="https://live.fanmingming.cn/tv/tianjin.png" group-title="卫视",天津卫视
 http://192.168.50.10:5000/rtp/239.3.1.141:1234
 #EXTINF:-1 tvg-id="40" tvg-name="重庆卫视" tvg-logo="https://live.fanmingming.cn/tv/chongqing.png" group-title="卫视",重庆卫视
 http://192.168.50.10:5000/rtp/239.3.1.122:8160
-#EXTINF:-1 tvg-id="38" tvg-name="山东卫视" tvg-logo="https://live.fanmingming.cn/tv/shandong.png" group-title="卫视",山东卫视
-http://192.168.50.10:5000/rtp/239.3.1.144:3005
 #EXTINF:-1 tvg-id="46" tvg-name="黑龙江卫视" tvg-logo="https://live.fanmingming.cn/tv/heilongjiang.png" group-title="卫视",黑龙江卫视
 http://192.168.50.10:5000/rtp/239.3.1.133:8016
 #EXTINF:-1 tvg-id="45" tvg-name="河北卫视" tvg-logo="https://live.fanmingming.cn/tv/hebei.png" group-title="卫视",河北卫视
@@ -135,8 +137,6 @@ http://192.168.50.10:5000/rtp/239.3.1.26:8108
 http://192.168.50.10:5000/rtp/239.3.1.144:4120
 #EXTINF:-1 tvg-id="68" tvg-name="厦门卫视" tvg-logo="https://live.fanmingming.cn/tv/xiamen.png" group-title="卫视",厦门卫视
 http://192.168.50.10:5000/rtp/239.3.1.143:4120
-#EXTINF:-1 tvg-id="56" tvg-name="四川卫视" tvg-logo="https://live.fanmingming.cn/tv/sichuan.png" group-title="卫视",四川卫视
-http://192.168.50.10:5000/rtp/239.3.1.131:3001
 #EXTINF:-1 tvg-id="53" tvg-name="宁夏卫视" tvg-logo="https://live.fanmingming.cn/tv/ningxia.png" group-title="卫视",宁夏卫视
 http://192.168.50.10:5000/rtp/239.3.1.46:8124
 #EXTINF:-1 tvg-id="54" tvg-name="山西卫视" tvg-logo="https://live.fanmingming.cn/tv/shanxi_.png" group-title="卫视",山西卫视
