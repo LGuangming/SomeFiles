@@ -105,10 +105,10 @@ http://192.168.50.10:5000/rtp/239.3.1.202:2000
 http://192.168.50.10:5000/rtp/239.3.1.203:2000
 #EXTINF:-1 tvg-id="38" tvg-name="山东卫视" tvg-logo="https://live.fanmingming.cn/tv/shandong.png" group-title="卫视",山东卫视
 http://192.168.50.10:5000/rtp/239.3.1.144:3005
-#EXTINF:-1 tvg-id="56" tvg-name="四川卫视" tvg-logo="https://live.fanmingming.cn/tv/sichuan.png" group-title="卫视",四川卫视
-http://192.168.50.10:5000/rtp/239.3.1.131:3001
 #EXTINF:-1 tvg-id="32" tvg-name="安徽卫视" tvg-logo="https://live.fanmingming.cn/tv/anhui.png" group-title="卫视",安徽卫视
 http://192.168.50.10:5000/rtp/239.3.1.211:8064
+#EXTINF:-1 tvg-id="56" tvg-name="四川卫视" tvg-logo="https://live.fanmingming.cn/tv/sichuan.png" group-title="卫视",四川卫视
+http://192.168.50.10:5000/rtp/239.3.1.131:3001
 #EXTINF:-1 tvg-id="39" tvg-name="天津卫视" tvg-logo="https://live.fanmingming.cn/tv/tianjin.png" group-title="卫视",天津卫视
 http://192.168.50.10:5000/rtp/239.3.1.141:1234
 #EXTINF:-1 tvg-id="40" tvg-name="重庆卫视" tvg-logo="https://live.fanmingming.cn/tv/chongqing.png" group-title="卫视",重庆卫视
