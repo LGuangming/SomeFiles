@@ -102,11 +102,11 @@ http://192.168.50.2:5000/rtp/228.1.1.210:8160
 #EXTINF:-1 tvg-id="46" tvg-name="黑龙江卫视" tvg-logo="https://live.fanmingming.cn/tv/heilongjiang.png" group-title="卫视",黑龙江卫视
 http://192.168.50.2:5000/rtp/228.1.1.35:8016
 #EXTINF:-1 tvg-id="45" tvg-name="河北卫视" tvg-logo="https://live.fanmingming.cn/tv/hebei.png" group-title="卫视",河北卫视
-http://192.168.50.2:5000/rtp/228.1.1.187:8072
+http://192.168.50.2:5000/rtp/228.1.1.35:8016
 #EXTINF:-1 tvg-id="36" tvg-name="辽宁卫视" tvg-logo="https://live.fanmingming.cn/tv/liaoning.png" group-title="卫视",辽宁卫视
 http://192.168.50.2:5000/rtp/228.1.1.19:8056
 #EXTINF:-1 tvg-id="48" tvg-name="湖北卫视" tvg-logo="https://live.fanmingming.cn/tv/hubei.png" group-title="卫视",湖北卫视
-http://192.168.50.2:5000/rtp/228.1.1.16:8044
+http://192.168.50.2:5000/rtp/228.1.1.185:8148
 #EXTINF:-1 tvg-id="51" tvg-name="吉林卫视" tvg-logo="https://live.fanmingming.cn/tv/jilin.png" group-title="卫视",吉林卫视
 http://192.168.50.2:5000/rtp/228.1.1.214:8172
 #EXTINF:-1 tvg-id="44" tvg-name="贵州卫视" tvg-logo="https://live.fanmingming.cn/tv/guizhou.png" group-title="卫视",贵州卫视
@@ -116,7 +116,7 @@ http://192.168.50.2:5000/rtp/228.1.1.185:8148
 #EXTINF:-1 tvg-id="50" tvg-name="江西卫视" tvg-logo="https://live.fanmingming.cn/tv/jiangxi.png" group-title="卫视",江西卫视
 http://192.168.50.2:5000/rtp/228.1.1.211:8164
 #EXTINF:-1 tvg-id="37" tvg-name="旅游卫视" tvg-logo="https://live.fanmingming.cn/tv/海南卫视.png" group-title="卫视",海南卫视
-http://192.168.50.2:5000/rtp/228.1.1.81:8304
+http://192.168.50.2:5000/rtp/228.1.1.71:8228
 #EXTINF:-1 tvg-id="58" tvg-name="云南卫视" tvg-logo="https://live.fanmingming.cn/tv/yunnan.png" group-title="卫视",云南卫视
 http://192.168.50.2:5000/rtp/228.1.1.44:8108
 #EXTINF:-1 tvg-id="61" tvg-name="兵团卫视" tvg-logo="https://live.fanmingming.cn/tv/bingtuan.png" group-title="卫视",兵团卫视
@@ -138,11 +138,11 @@ http://192.168.50.2:5000/rtp/228.1.1.245:8188
 #EXTINF:-1 tvg-id="72" tvg-name="三沙卫视" tvg-logo="https://live.fanmingming.cn/tv/sansha.png" group-title="卫视",三沙卫视
 http://192.168.50.2:5000/rtp/228.1.1.186:4120
 #EXTINF:-1 tvg-id="55" tvg-name="陕西卫视" tvg-logo="https://live.fanmingming.cn/tv/shanxi.png" group-title="卫视",陕西卫视
-http://192.168.50.2:5000/rtp/228.1.1.53:8140
+http://192.168.50.2:5000/rtp/228.1.1.72:8220
 #EXTINF:-1 tvg-id="59" tvg-name="青海卫视" tvg-logo="https://live.fanmingming.cn/tv/qinghai.png" group-title="卫视",青海卫视
 http://192.168.50.2:5000/rtp/228.1.1.60:8184
 #EXTINF:-1 tvg-id="52" tvg-name="内蒙古卫视" tvg-logo="https://live.fanmingming.cn/tv/内蒙古卫视.png" group-title="卫视",内蒙古卫视
-http://192.168.50.2:5000/rtp/228.1.1.59:8176
+http://192.168.50.2:5000/rtp/228.1.1.73:8224
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="北京",朝阳融媒
 http://192.168.50.2:5000/rtp/228.1.1.140:8001
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="" group-title="北京",房山电视台
