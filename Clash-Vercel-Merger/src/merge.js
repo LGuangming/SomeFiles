@@ -52,7 +52,7 @@ export function isSubscriptionInfoNode(name) {
   const value = String(name || '').normalize('NFKC').replace(/[\s\u200b-\u200d\ufeff]/g, '');
   // Providers sometimes disguise a quota notice as a normal SS/VLESS proxy,
   // including a flag (e.g. 🇬🇧 剩余流量 12 GB). Don't classify it as a country node.
-  return /(?:剩余|剩餘)(?:套餐)?流量|流量(?:剩余|剩餘)|(?:剩余|剩餘)[:：]?[\d.]+(?:GB|MB|TB|G|M|T)\b|(?:remaining|left|available)(?:traffic|data)|(?:traffic|data)(?:remaining|left)|距(?:离)?(?:下次|下一次)?(?:套餐|流量)?(?:重置|重設|重设|刷新)|(?:下次|下一次)(?:套餐|流量)?(?:重置|重設|重设|刷新)(?:剩余|剩餘|还有|還有|还剩|還剩|倒计时|倒計時)/i.test(value);
+  return /(?:剩余|剩餘)(?:套餐)?流量|流量(?:剩余|剩餘)|(?:剩余|剩餘)[:：]?[\d.]+(?:GB|MB|TB|G|M|T)\b|(?:remaining|left|available)(?:traffic|data)|(?:traffic|data)(?:remaining|left)|距(?:离)?(?:下次|下一次)?(?:套餐|流量)?(?:重置|重設|重设|刷新)|(?:下次|下一次)(?:套餐|流量)?(?:重置|重設|重设|刷新)(?:剩余|剩餘|还有|還有|还剩|還剩|倒计时|倒計時)|(?:套餐|订阅|訂閱)(?:(?:即将|即將|将于|將於|已经|已經|已))?(?:到期|过期|過期|失效)|(?:套餐|订阅|訂閱)(?:有效期|到期日期|到期时间|到期時間)|(?:套餐|订阅|訂閱)(?:将于|將於)[\d年月日:/._-]{1,24}(?:到期|过期|過期|失效)/i.test(value);
 }
 
 function parseYaml(text, label) {

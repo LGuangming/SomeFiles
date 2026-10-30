@@ -119,3 +119,36 @@ test('reset countdown notices are filtered, including UK-flagged entries', () =>
   assert.deepEqual(parsed.rules, YAML.parse(original).rules);
   assert.deepEqual(parsed.dns, YAML.parse(original).dns);
 });
+
+test('subscription expiry notices are filtered without suppressing real proxies', () => {
+  const notices = [
+    '🇬🇧 套餐到期：2026-11-30',
+    '套餐即将到期 3 天',
+    '套餐已过期',
+    '🇬🇧 訂閱到期 2026/11/30',
+    '订阅将于 2026年11月 到期',
+    '套餐有效期至 2026-11-30'
+  ];
+  for (const name of notices) {
+    assert.equal(isSubscriptionInfoNode(name), true, name);
+  }
+  for (const name of ['🇬🇧 London 01', '🇺🇸 US 02', '🇯🇵 套餐极速 日本 03']) {
+    assert.equal(isSubscriptionInfoNode(name), false, name);
+  }
+  const input = `proxies:
+  - {name: '🇬🇧 套餐到期：2026-11-30', type: ss, server: notice.example, port: 443}
+  - {name: '套餐即将到期 3 天', type: ss, server: notice2.example, port: 443}
+  - {name: '🇬🇧 London 01', type: ss, server: uk.example, port: 443}
+`;
+  const result = mergeClash(original, [input]);
+  const parsed = YAML.parse(result.yaml);
+  assert.equal(result.stats.sourceNodes, 3);
+  assert.equal(result.stats.filteredInfoNodes, 2);
+  assert.equal(result.stats.importedNodes, 1);
+  assert.deepEqual(result.stats.regionGroups.map(x => x.region), ['英国']);
+  assert.deepEqual(parsed['proxy-groups'].find(x => x.name === '英国').proxies, ['🇬🇧 London 01']);
+  assert.equal(parsed.proxies.some(x => /套餐到期|套餐即将到期/.test(x.name)), false);
+  assert.equal(parsed['proxy-groups'][0].proxies.some(x => /套餐到期|套餐即将到期/.test(x)), false);
+  assert.deepEqual(parsed.rules, YAML.parse(original).rules);
+  assert.deepEqual(parsed.dns, YAML.parse(original).dns);
+});
