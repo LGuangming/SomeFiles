@@ -4,7 +4,7 @@
 
 - **主配置模板 URL（`BASE_CONFIG_URL`）**：返回你完整的 Clash / Mihomo YAML，包括 DNS、规则、原节点及原有代理组。
 - **上游节点订阅 URL（`SUBSCRIPTION_URL`）**：返回 Clash YAML，只导入其中的 `proxies`，完全忽略上游规则、DNS、代理组。
-- **`FEED_KEY`**：保护网页操作和 `/sub/:key` 完整配置订阅。
+- **`FEED_KEY`**：保护客户端 `/sub/:key` 订阅地址；打开网页模式时也用于预览/管理 API。
 
 **不需要 Redis、KV、云数据库，也不需要把原 YAML 编码写进环境变量。** 每次 Clash 客户端更新订阅时，Vercel 同时抓取这两个 URL 并生成合并 YAML。
 
@@ -19,14 +19,15 @@
 | `BASE_CONFIG_URL` | 完整主配置 YAML 的 **HTTPS 原始文件地址**，例如 `https://raw.githubusercontent.com/USER/REPO/main/config.yaml` |
 | `SUBSCRIPTION_URL` | 节点提供商的完整 **Clash YAML 订阅地址**（可以包含其 token 参数） |
 | `FEED_KEY` | 自选访问密钥，已有短密钥也可匹配；强烈建议至少 32 字符，推荐运行 `openssl rand -hex 32` |
+| `ENABLE_WEB_UI` | `false`（默认）关闭首页及预览/下载 API；`true` 打开原有管理网页 |
 
 4. Deploy / Redeploy。环境变量修改后需要新部署才生效。
-5. 打开 Vercel 网站，在网页输入 `FEED_KEY`，点击 **检查 Vercel 默认配置**。可以选择填入两个临时 URL 做预览；不填则从环境变量读取。
+5. **默认关闭网页**。如需使用网页预览，设定 `ENABLE_WEB_UI=true` 并重新部署；打开 Vercel 网站输入 `FEED_KEY` 后即可使用原有预览/下载功能。
 6. 把 `https://你的Vercel域名/sub/你的FEED_KEY` 加入 Clash/Mihomo 的远程配置订阅。
 
 **注意：** 如果主配置托管在 GitHub，必须填写 `raw.githubusercontent.com` 原始内容链接，而不是 `github.com/.../blob/...` 的网页链接。带有认证信息、订阅 token、节点 UUID 等秘密的主 YAML **不应放在公开 GitHub 仓库**。主配置 URL 需要能从 Vercel 直接读取；若使用私有仓库或需要授权头的地址，当前版本无法直接访问。可使用专门的受控/签名 HTTPS 直链。
 
-## 二、网页预览和下载
+## 二、可选网页预览和下载（ENABLE_WEB_UI=true）
 
 网页可以直接使用环境变量定义的两个 URL，也可以在界面临时输入：
 
@@ -48,21 +49,21 @@
 
 | 地址 | 功能 | 验证 |
 | --- | --- | --- |
-| `/` | 静态网页界面（即使合并 API 出错也可打开） | 无（但数据 API 需要鉴权） |
+| `/`、`/index.html`、`/api/home` | `ENABLE_WEB_UI=true` 时开放原网页，默认返回 404 | 无（但数据 API 需要 FEED_KEY 鉴权） |
 | `GET /api/health` | 函数健康检查（不访问上游 URL，也不需密钥） | 无 |
-| `GET /api/status` | 验证环境变量中的主配置，并显示基本统计 | `Authorization: Bearer FEED_KEY` |
-| `POST /api/merge` | 临时 URL/上传预览，返回 YAML 和统计 | `Authorization: Bearer FEED_KEY` |
-| `GET /api/download` | 直接下载默认合并配置 | `Authorization: Bearer FEED_KEY` |
+| `GET /api/status` | 验证环境变量中的主配置，并显示基本统计（仅网页启用时） | `Authorization: Bearer FEED_KEY` |
+| `POST /api/merge` | 临时 URL/上传预览，返回 YAML 和统计（仅网页启用时） | `Authorization: Bearer FEED_KEY` |
+| `GET /api/download` | 直接下载默认合并配置（仅网页启用时） | `Authorization: Bearer FEED_KEY` |
 | `GET /sub/:key` | 客户端自动更新的完整 YAML | URL 中携带 `FEED_KEY` |
 
 ## 五、项目代码
 
 - `src/clash-handler.js`：两个远程 YAML 获取、输入限制、鉴权及 API。
 - `src/merge.js`：节点去重、地区识别、YAML 无损优先合并及校验。
-- `public/index.html`：中文静态网页，不依赖函数运行。
+- `src/ui.js`：完整原中文网页（未删除功能），在 `ENABLE_WEB_UI=true` 时由 `api/home.js` 提供。
 - `api/`：Vercel Node.js Functions 路由。
 - `test/`：自动测试。
-- `vercel.json`：仅重写 `/sub/:key` 订阅路由，首页由 Vercel 静态托管。
+- `vercel.json`：订阅路由保持不变，`/` 和 `/index.html` 由可选网页函数控制。
 
 本地验证：
 
@@ -86,7 +87,7 @@ npx vercel dev
 ## 七、遇到 500 FUNCTION_INVOCATION_FAILED
 
 1. 确认 Framework Preset 为 **Other**、Root Directory 为 **Clash-Vercel-Merger**，并使用最新 main 提交重新部署。
-2. 先访问 `/`：它应为静态首页，不需要函数和环境变量。
+2. 先访问 `/`：默认应返回 404；如果设置 `ENABLE_WEB_UI=true`，应返回网页。随后检查 `/api/health`。
 3. 再访问 `/api/health`：应返回 `{"ok":true,"service":"clash-vercel-merger"}`。如果健康检查也 500，查看 Vercel Project → Logs 中对应的运行时异常，检查 Node.js 版本和 Root Directory。
 4. 如果 `/api/health` 正常，但 `/api/status` 不正常，先在 Vercel 设置 `BASE_CONFIG_URL`、`SUBSCRIPTION_URL`、`FEED_KEY` 并 Redeploy；再从页面输入 FEED_KEY，点击“检查 Vercel 默认配置”。上游文件 403/超时会返回可读 JSON 错误。
 5. 如 `/api/status` 返回 `FUNCTION_INVOCATION_FAILED`，通常属于函数加载/依赖/运行时错误，检查日志中是否有 `Cannot find package 'yaml'`、`ERR_MODULE_NOT_FOUND` 或 `TypeError`。确保 `yaml` 出现在根目录 `package.json` 的 `dependencies` 内。
@@ -95,13 +96,13 @@ npx vercel dev
 
 ### 处理 Vercel CLI 65 报错 No entrypoint found
 
-如果 Build Logs 出现 `[BUILD_FAILED] No entrypoint found`，说明 Vercel 将该目录作为需要 Node/Express 应用入口的项目构建。此仓库采用经典的 `public/index.html` 静态页面 + `api/*.js` 独立函数模式，**不需要** `app.js`、`server.js` 或 Express。
+如果 Build Logs 出现 `[BUILD_FAILED] No entrypoint found`，说明 Vercel 将该目录作为需要 Node/Express 应用入口的项目构建。此仓库采用 `src/ui.js` 可选网页 + `api/*.js` 独立函数模式，**不需要** `app.js`、`server.js` 或 Express。
 
 仓库 `vercel.json` 已强制设置：
 
 - `"framework": null`：使用 **Other**，覆盖 Vercel 项目设置中错误的框架预设。
 - `"buildCommand": ""`：不执行前端构建。
-- `"outputDirectory": "public"`：发布静态首页；`api/` 路由仍作为 Vercel Functions 提供服务。
+- `"outputDirectory": "public"`：发布不含首页的静态目录；`api/` 路由仍作为 Vercel Functions 提供服务，根路径由 `api/home.js` 根据开关返回网页或 404。
 
 在 Vercel → Project → Settings → Build and Deployment 中确认 Root Directory 为 `Clash-Vercel-Merger`；然后使用 **最新 main commit** 新建部署，必要时选择 **Redeploy without Build Cache**。部署成功后先访问 `/` 和 `/api/health`。如仍报错，请提供新部署的 Build Logs，勿发送密钥。
 
@@ -112,3 +113,12 @@ npx vercel dev
 - **503 未配置 FEED_KEY**：确认变量名精确为 `FEED_KEY`，检查是否配置到当前部署对应的 **Production** 或 **Preview** 环境，并重新部署。
 - **401 FEED_KEY 不匹配**：只输入环境变量的 **Value**，不是 `FEED_KEY=...`，保留大小写；检查是不是打开了旧部署或 Preview 网址。程序会忽略密钥首尾因复制产生的空格/换行。
 - 密钥无须提供给任何人排查；不要在截图、日志或对话中公开它。
+
+## 八、网页开关说明
+
+配置 `ENABLE_WEB_UI`（Vercel Settings → Environment Variables）：
+
+- 不设置 / `false`：默认隐藏网页。`/`、`/index.html`、`/api/home` 返回 404；原预览接口 `/api/status`、`/api/merge`、`/api/download` 同样返回 404。**`/sub/FEED_KEY` 始终保持可用**。`/api/health` 保留健康检查。
+- `true`：恢复全部网页和原有受 `FEED_KEY` 保护的预览、下载功能。
+
+修改环境变量后需触发新的 Vercel 部署。原先静态 `public/index.html` 已迁入 `src/ui.js`，避免直接访问静态 HTML 绕开网页开关。这是隐藏网页/减少暴露面，不替代 FEED_KEY 身份验证；旧部署的静态域名应另行检查是否仍可访问。

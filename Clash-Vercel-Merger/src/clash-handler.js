@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
 import { mergeClash, MergeError, validateBaseYaml } from './merge.js';
+import { isWebUiEnabled } from './ui-toggle.js';
 
 const MAX_BASE_BYTES = 1_500_000;
 const MAX_SOURCE_BYTES = 3_000_000;
@@ -145,6 +146,9 @@ export function outputYaml(res, yaml, userInfo = '') {
 }
 
 export async function handler(req, res, action) {
+  if (['status', 'merge', 'download'].includes(action) && !isWebUiEnabled()) {
+    return error(res, 404, 'Not Found');
+  }
   if (typeof process.env.FEED_KEY !== 'string' || !process.env.FEED_KEY.trim()) {
     return error(res, 503, '当前部署尚未配置 FEED_KEY。请在 Vercel 环境变量中设置并重新部署。');
   }

@@ -3,6 +3,14 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/api/home"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/home"
+    },
+    {
       "source": "/sub/:key",
       "destination": "/api/feed?key=:key"
     }
