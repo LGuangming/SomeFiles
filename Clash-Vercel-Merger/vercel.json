@@ -11,5 +11,8 @@
     "api/*.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": "public"
 }

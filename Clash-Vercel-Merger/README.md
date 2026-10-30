@@ -91,3 +91,15 @@ npx vercel dev
 5. 如 `/api/status` 返回 `FUNCTION_INVOCATION_FAILED`，通常属于函数加载/依赖/运行时错误，检查日志中是否有 `Cannot find package 'yaml'`、`ERR_MODULE_NOT_FOUND` 或 `TypeError`。确保 `yaml` 出现在根目录 `package.json` 的 `dependencies` 内。
 
 不要发送 Vercel 环境变量的值或任何含 token 的完整订阅 URL；排错只需日志中不含凭据的错误类型和堆栈。
+
+### 处理 Vercel CLI 65 报错 No entrypoint found
+
+如果 Build Logs 出现 `[BUILD_FAILED] No entrypoint found`，说明 Vercel 将该目录作为需要 Node/Express 应用入口的项目构建。此仓库采用经典的 `public/index.html` 静态页面 + `api/*.js` 独立函数模式，**不需要** `app.js`、`server.js` 或 Express。
+
+仓库 `vercel.json` 已强制设置：
+
+- `"framework": null`：使用 **Other**，覆盖 Vercel 项目设置中错误的框架预设。
+- `"buildCommand": ""`：不执行前端构建。
+- `"outputDirectory": "public"`：发布静态首页；`api/` 路由仍作为 Vercel Functions 提供服务。
+
+在 Vercel → Project → Settings → Build and Deployment 中确认 Root Directory 为 `Clash-Vercel-Merger`；然后使用 **最新 main commit** 新建部署，必要时选择 **Redeploy without Build Cache**。部署成功后先访问 `/` 和 `/api/health`。如仍报错，请提供新部署的 Build Logs，勿发送密钥。
