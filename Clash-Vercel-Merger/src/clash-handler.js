@@ -18,8 +18,12 @@ function reply(res, status, value, contentType = 'application/json; charset=utf-
 function error(res, status, message) { reply(res, status, { error: message }); }
 
 export function sameSecret(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string' || b.length < 24) return false;
-  const aa = Buffer.from(a, 'utf8'), bb = Buffer.from(b, 'utf8');
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  // Ignore accidental surrounding whitespace in Vercel environment values and pasted keys.
+  // A short existing key is valid, though a long random key is strongly recommended.
+  const supplied = a.trim(), configured = b.trim();
+  if (!supplied || !configured) return false;
+  const aa = Buffer.from(supplied, 'utf8'), bb = Buffer.from(configured, 'utf8');
   return aa.length === bb.length && timingSafeEqual(aa, bb);
 }
 
@@ -141,7 +145,12 @@ export function outputYaml(res, yaml, userInfo = '') {
 }
 
 export async function handler(req, res, action) {
-  if (!sameSecret(getKey(req, action), process.env.FEED_KEY)) return error(res, 401, '访问密钥无效。');
+  if (typeof process.env.FEED_KEY !== 'string' || !process.env.FEED_KEY.trim()) {
+    return error(res, 503, '当前部署尚未配置 FEED_KEY。请在 Vercel 环境变量中设置并重新部署。');
+  }
+  if (!sameSecret(getKey(req, action), process.env.FEED_KEY)) {
+    return error(res, 401, '输入的 FEED_KEY 与当前部署不匹配。请检查填写的 Value、Production/Preview 环境范围，以及环境变量修改后是否重新部署。');
+  }
   if (req.method === 'POST') {
     const origin = req.headers.origin;
     const proto = req.headers['x-forwarded-proto'] || 'https';

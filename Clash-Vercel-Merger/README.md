@@ -18,7 +18,7 @@
 | --- | --- |
 | `BASE_CONFIG_URL` | 完整主配置 YAML 的 **HTTPS 原始文件地址**，例如 `https://raw.githubusercontent.com/USER/REPO/main/config.yaml` |
 | `SUBSCRIPTION_URL` | 节点提供商的完整 **Clash YAML 订阅地址**（可以包含其 token 参数） |
-| `FEED_KEY` | 自选的强随机值，最少 24 字符，推荐运行 `openssl rand -hex 32` |
+| `FEED_KEY` | 自选访问密钥，已有短密钥也可匹配；强烈建议至少 32 字符，推荐运行 `openssl rand -hex 32` |
 
 4. Deploy / Redeploy。环境变量修改后需要新部署才生效。
 5. 打开 Vercel 网站，在网页输入 `FEED_KEY`，点击 **检查 Vercel 默认配置**。可以选择填入两个临时 URL 做预览；不填则从环境变量读取。
@@ -103,3 +103,11 @@ npx vercel dev
 - `"outputDirectory": "public"`：发布静态首页；`api/` 路由仍作为 Vercel Functions 提供服务。
 
 在 Vercel → Project → Settings → Build and Deployment 中确认 Root Directory 为 `Clash-Vercel-Merger`；然后使用 **最新 main commit** 新建部署，必要时选择 **Redeploy without Build Cache**。部署成功后先访问 `/` 和 `/api/health`。如仍报错，请提供新部署的 Build Logs，勿发送密钥。
+
+### FEED_KEY 显示不匹配
+
+旧版本将 `FEED_KEY` 强制要求至少 24 字符，导致即使输入正确的短密钥也返回 401。现在移除了这一兼容性限制：只要非空且与环境变量匹配即可通过；**仍强烈建议使用足够长的随机密钥**，以防他人猜测并下载你的完整 Clash 凭据。
+
+- **503 未配置 FEED_KEY**：确认变量名精确为 `FEED_KEY`，检查是否配置到当前部署对应的 **Production** 或 **Preview** 环境，并重新部署。
+- **401 FEED_KEY 不匹配**：只输入环境变量的 **Value**，不是 `FEED_KEY=...`，保留大小写；检查是不是打开了旧部署或 Preview 网址。程序会忽略密钥首尾因复制产生的空格/换行。
+- 密钥无须提供给任何人排查；不要在截图、日志或对话中公开它。

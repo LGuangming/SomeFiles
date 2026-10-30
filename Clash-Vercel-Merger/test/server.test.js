@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildConfig, checkSourceUrl, fetchRemote, loadEnvironment, sameSecret } from '../src/clash-handler.js';
+import { buildConfig, checkSourceUrl, fetchRemote, handler, loadEnvironment, sameSecret } from '../src/clash-handler.js';
 
 const base = `dns: {enable: true}
 proxies: []
@@ -31,6 +31,10 @@ test('rejects unsafe addresses; accepts HTTPS with signed query', () => {
   assert.equal(checkSourceUrl('https://example.com/config.yaml?key=abc'), 'https://example.com/config.yaml?key=abc');
   assert.equal(sameSecret('a'.repeat(25), 'a'.repeat(25)), true);
   assert.equal(sameSecret('a'.repeat(25), 'b'.repeat(25)), false);
+  assert.equal(sameSecret('short', 'short'), true);
+  assert.equal(sameSecret(' short ', 'short'), true);
+  assert.equal(sameSecret('short', ' short\n '), true);
+  assert.equal(sameSecret('', ''), false);
 });
 
 test('loads URLs, not base64 YAML, from environment', () => {
@@ -81,4 +85,32 @@ test('redirect to insecure endpoint is rejected', async () => {
   globalThis.fetch=async()=>new Response(null,{status:302,headers:{location:'http://127.0.0.1/private'}});
   try{await assert.rejects(fetchRemote('https://example.com/main.yaml','主配置',10000),/HTTPS/);}
   finally {globalThis.fetch=originalFetch;}
+});
+
+test('authentication distinguishes a missing environment key from a wrong key', async () => {
+  function capture() {
+    const result = { code: null, body: null };
+    return {
+      result,
+      res: {
+        writeHead(code) { result.code = code; },
+        end(body) { result.body = JSON.parse(body); }
+      }
+    };
+  }
+  const req = (key) => ({ method: 'GET', headers: { authorization: 'Bearer ' + key }, query: {} });
+  try {
+    delete process.env.FEED_KEY;
+    const missing = capture();
+    await handler(req('short'), missing.res, 'status');
+    assert.equal(missing.result.code, 503);
+    assert.match(missing.result.body.error, /尚未配置 FEED_KEY/);
+    process.env.FEED_KEY = 'short';
+    const wrong = capture();
+    await handler(req('different'), wrong.res, 'status');
+    assert.equal(wrong.result.code, 401);
+    const accepted = capture();
+    await handler(req('short'), accepted.res, 'unknown-route');
+    assert.equal(accepted.result.code, 405);
+  } finally { restoreEnv(); }
 });

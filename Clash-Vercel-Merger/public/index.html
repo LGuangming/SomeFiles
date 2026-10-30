@@ -25,7 +25,7 @@ small{font-size:12px}.foot{font-size:12px;color:var(--sub);text-align:center;mar
 <h1>Clash / Mihomo 节点合并器</h1>
 <p class="muted">主配置和节点订阅都可以通过 HTTPS URL 实时读取。仅导入上游节点，按地区创建 <code>url-test</code> 组，不修改原有规则、DNS、DIRECT / Proxy 等已有选项。</p>
 <div class="panel"><h2>1 · 访问验证</h2>
-<div class="field"><label for="secret">访问密钥（FEED_KEY）</label><input id="secret" type="password" autocomplete="off" placeholder="Vercel 环境变量 FEED_KEY"/></div>
+<div class="field"><label for="secret">访问密钥（FEED_KEY）</label><input id="secret" type="password" autocomplete="off" placeholder="填写 Vercel 环境变量 FEED_KEY 的 Value"/><div class="muted" style="margin-top:6px">只填写环境变量的 Value，不要包含 FEED_KEY=。密钥可以是已有短值，但建议改为 32 字符以上随机值；修改后需重新部署。</div></div>
 <div class="row"><button id="statusbtn">检查 Vercel 默认配置</button><span class="muted">密钥仅保留在本页面内存，不写入本地存储。</span></div>
 <div class="info" id="status">尚未检查。未设置默认 URL 时，仍可在下方输入两个 URL 进行临时预览。</div></div>
 <div class="panel"><h2>2 · 输入两个远程 URL</h2>
