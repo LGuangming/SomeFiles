@@ -46,6 +46,15 @@ export function checkSourceUrl(raw) {
 
 async function readBody(req, maxBytes) {
   if (Number(req.headers['content-length'] || 0) > maxBytes) throw new MergeError('上传内容过大。', 413);
+  // Vercel may pre-parse application/json into req.body before the handler runs.
+  // Accept both its request helper and an unconsumed Node.js request stream.
+  let parsed;
+  try { parsed = req.body; } catch { throw new MergeError('请求正文解析失败。'); }
+  if (parsed !== undefined && parsed !== null) {
+    const buf = Buffer.isBuffer(parsed) ? parsed : Buffer.from(typeof parsed === 'string' ? parsed : JSON.stringify(parsed));
+    if (buf.length > maxBytes) throw new MergeError('上传内容过大。', 413);
+    return new TextDecoder('utf-8', { fatal: true }).decode(buf);
+  }
   let size = 0;
   const chunks = [];
   for await (const chunk of req) {
