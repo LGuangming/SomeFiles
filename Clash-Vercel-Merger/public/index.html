@@ -73,7 +73,7 @@ $('preview').onclick=async()=>{
   $('nodes').textContent=s.importedNodes;$('groupcount').textContent=s.regionGroups.length;$('oldgroups').textContent=s.originalGroups;$('rules').textContent=s.rules;
   const panel=$('regions');panel.replaceChildren();
   for(const group of s.regionGroups){const item=document.createElement('div');item.className='region';const name=document.createElement('span');name.textContent=group.name;const count=document.createElement('small');count.textContent=group.count+' 节点';item.append(name,count);panel.append(item);}
-  $('details').textContent='上游节点 '+s.sourceNodes+'，跳过重复 '+s.duplicateNodes+'，重名修改 '+s.renamedNodes+'。';
+  $('details').textContent='上游节点 '+s.sourceNodes+'，过滤流量提示 '+(s.filteredInfoNodes||0)+'，跳过重复 '+s.duplicateNodes+'，重名修改 '+s.renamedNodes+'。';
   $('results').hidden=false;notice('message','合并成功。可下载 YAML，或使用下方固定订阅地址。',true);
  }catch(e){notice('message',e.message,false);}finally{$('preview').disabled=false;}
 };

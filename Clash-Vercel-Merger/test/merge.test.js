@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import YAML from 'yaml';
-import { mergeClash, detectRegion, validateBaseYaml } from '../src/merge.js';
+import { mergeClash, detectRegion, isSubscriptionInfoNode, validateBaseYaml } from '../src/merge.js';
 
 const original = `# base config\nsecret: super-secret\ndns:\n  enable: true\n  nameserver: [1.1.1.1]\nproxies:\n  - name: Old USA\n    type: ss\n    server: old.test\n    port: 443\nproxy-groups:\n  - name: Auto\n    type: url-test\n    url: http://captive.apple.com/generate_204\n    interval: 300\n    proxies: [Old USA]\n  - name: Proxy\n    type: select\n    proxies: [Old USA]\n  - name: Domestic\n    type: select\n    proxies: [DIRECT, Proxy, Auto, Old USA]\n  - name: AI\n    type: select\n    proxies: [Proxy, Auto]\nrules:\n  - GEOSITE,cn,DIRECT\n  - MATCH,Proxy\n`;
 const source = `proxies:\n  - {name: '🇺🇸 US 01', type: ss, server: us.example, port: 8888, password: A}\n  - {name: '🇺🇸 US 02', type: ss, server: us2.example, port: 8888, password: B}\n  - {name: 'HK 01', type: ss, server: hk.example, port: 8888, password: C}\n  - {name: '🇯🇵 东京 01', type: ss, server: jp.example, port: 8888, password: D}\n  - {name: 'Random 01', type: ss, server: xx.example, port: 8888, password: E}\nproxy-groups:\n  - {name: Proxy, type: select, proxies: [🇺🇸 US 01]}\nrules:\n  - MATCH,Proxy\n`;
@@ -53,4 +53,37 @@ test('duplicate source nodes are skipped', () => {
 test('validates base and rejects missing proxies subscription', () => {
   assert.equal(validateBaseYaml(original).originalGroups, 4);
   assert.throws(() => mergeClash(original, ['rules:\n  - MATCH,DIRECT']), /缺少 proxies/);
+});
+
+test('traffic quota notices are excluded before country classification and Auto group insertion', () => {
+  const sourceWithQuota = `proxies:
+  - {name: '🇬🇧 剩余流量：12.5 GB', type: ss, server: quota1.test, port: 443}
+  - {name: '流量剩餘 12GB', type: ss, server: quota2.test, port: 443}
+  - {name: 'Remaining Traffic 12GB', type: ss, server: quota3.test, port: 443}
+  - {name: '🇬🇧 UK London 01', type: ss, server: uk.test, port: 443}
+  - {name: '🇯🇵 JP 01', type: ss, server: jp.test, port: 443}
+`;
+  assert.equal(isSubscriptionInfoNode('🇬🇧 剩余流量：12.5 GB'), true);
+  assert.equal(isSubscriptionInfoNode('流量剩餘 12GB'), true);
+  assert.equal(isSubscriptionInfoNode('Remaining Traffic 12GB'), true);
+  assert.equal(isSubscriptionInfoNode('🇬🇧 UK London 01'), false);
+  const output = mergeClash(original, [sourceWithQuota]);
+  const parsed = YAML.parse(output.yaml);
+  assert.equal(output.stats.sourceNodes, 5);
+  assert.equal(output.stats.filteredInfoNodes, 3);
+  assert.equal(output.stats.importedNodes, 2);
+  assert.deepEqual(output.stats.regionGroups.map(x => x.region).sort(), ['日本', '英国'].sort());
+  assert.ok(parsed.proxies.some(x => x.name === '🇬🇧 UK London 01'));
+  assert.ok(parsed['proxy-groups'].some(x => x.name === '英国' && x.proxies.length === 1));
+  assert.equal(parsed.proxies.some(x => /剩余流量|流量剩餘|Remaining Traffic/i.test(x.name)), false);
+  assert.equal(parsed['proxy-groups'][0].proxies.some(x => /剩余流量|流量剩餘|Remaining Traffic/i.test(x)), false);
+  assert.equal(parsed['proxy-groups'][2].proxies[0], 'DIRECT');
+  assert.equal(parsed['proxy-groups'][2].proxies[1], 'Proxy');
+});
+
+test('when all subscription entries are quota notices, reject an empty regional configuration', () => {
+  const onlyQuota = `proxies:
+  - {name: '🇬🇧 剩余流量 10GB', type: ss, server: quota.test, port: 443}
+`;
+  assert.throws(() => mergeClash(original, [onlyQuota]), /没有可导入的代理节点/);
 });

@@ -47,6 +47,14 @@ export function detectRegion(name) {
   return '其他地区';
 }
 
+/** Only remove subscription traffic-quota announcement entries, never base-config nodes. */
+export function isSubscriptionInfoNode(name) {
+  const value = String(name || '').normalize('NFKC').replace(/[\s\u200b-\u200d\ufeff]/g, '');
+  // Providers sometimes disguise a quota notice as a normal SS/VLESS proxy,
+  // including a flag (e.g. 🇬🇧 剩余流量 12 GB). Don't classify it as a country node.
+  return /(?:剩余|剩餘)(?:套餐)?流量|流量(?:剩余|剩餘)|(?:剩余|剩餘)[:：]?[\d.]+(?:GB|MB|TB|G|M|T)\b|(?:remaining|left|available)(?:traffic|data)|(?:traffic|data)(?:remaining|left)/i.test(value);
+}
+
 function parseYaml(text, label) {
   if (typeof text !== 'string' || !text.trim()) throw new MergeError(`${label}为空。`);
   const doc = YAML.parseDocument(text.replace(/^\uFEFF/, ''), { uniqueKeys: true });
@@ -123,9 +131,11 @@ export function mergeClash(baseText, subscriptionTexts) {
     reserved.add(proxy.name);
     existingIdentities.add(stableEncode({ ...proxy, name: undefined }));
   }
-  const incoming = subscriptionTexts.flatMap((text, i) => getSubscriptionProxies(text, i + 1));
-  if (incoming.length > 5000) throw new MergeError('一次合并最多支持 5000 个订阅节点。');
-  if (incoming.length === 0) throw new MergeError('订阅 YAML 中没有任何代理节点。');
+  const allIncoming = subscriptionTexts.flatMap((text, i) => getSubscriptionProxies(text, i + 1));
+  if (allIncoming.length > 5000) throw new MergeError('一次合并最多支持 5000 个订阅节点。');
+  const incoming = allIncoming.filter(proxy => !isSubscriptionInfoNode(proxy.name));
+  const filteredInfoNodes = allIncoming.length - incoming.length;
+  if (incoming.length === 0) throw new MergeError('订阅 YAML 中没有可导入的代理节点（流量提示节点已排除）。');
   const regions = new Map();
   const imported = [];
   let skipped = 0, renamed = 0;
@@ -213,7 +223,8 @@ export function mergeClash(baseText, subscriptionTexts) {
     yaml,
     stats: {
       originalNodes: originalProxies.length,
-      sourceNodes: incoming.length,
+      sourceNodes: allIncoming.length,
+      filteredInfoNodes,
       importedNodes: imported.length,
       duplicateNodes: skipped,
       renamedNodes: renamed,
