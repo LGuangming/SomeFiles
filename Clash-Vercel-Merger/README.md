@@ -47,7 +47,8 @@
 
 | 地址 | 功能 | 验证 |
 | --- | --- | --- |
-| `/` | 网页界面 | 无（但数据 API 需要鉴权） |
+| `/` | 静态网页界面（即使合并 API 出错也可打开） | 无（但数据 API 需要鉴权） |
+| `GET /api/health` | 函数健康检查（不访问上游 URL，也不需密钥） | 无 |
 | `GET /api/status` | 验证环境变量中的主配置，并显示基本统计 | `Authorization: Bearer FEED_KEY` |
 | `POST /api/merge` | 临时 URL/上传预览，返回 YAML 和统计 | `Authorization: Bearer FEED_KEY` |
 | `GET /api/download` | 直接下载默认合并配置 | `Authorization: Bearer FEED_KEY` |
@@ -55,12 +56,12 @@
 
 ## 五、项目代码
 
-- `src/server.js`：两个远程 YAML 获取、输入限制、鉴权及 API。
+- `src/clash-handler.js`：两个远程 YAML 获取、输入限制、鉴权及 API。
 - `src/merge.js`：节点去重、地区识别、YAML 无损优先合并及校验。
-- `src/ui.js`：中文静态网页。
+- `public/index.html`：中文静态网页，不依赖函数运行。
 - `api/`：Vercel Node.js Functions 路由。
 - `test/`：自动测试。
-- `vercel.json`：网页和 `/sub/:key` 路由重写。
+- `vercel.json`：仅重写 `/sub/:key` 订阅路由，首页由 Vercel 静态托管。
 
 本地验证：
 
@@ -80,3 +81,13 @@ npx vercel dev
 4. 非 YAML 的 Base64 分享链接、订阅转换页面、仅有 `proxy-providers` 的文件不受支持。
 5. 远程文件必须能从 Vercel 出站网络访问；源站若限制地域/IP，可能出现 403、超时等错误。单次请求受到 Vercel Functions 时长与响应大小限制。
 6. 当前项目不保存上传内容，不提供网页上“永久保存设置”的功能；长期订阅使用 Vercel 环境变量中的两个 URL。
+
+## 七、遇到 500 FUNCTION_INVOCATION_FAILED
+
+1. 确认 Framework Preset 为 **Other**、Root Directory 为 **Clash-Vercel-Merger**，并使用最新 main 提交重新部署。
+2. 先访问 `/`：它应为静态首页，不需要函数和环境变量。
+3. 再访问 `/api/health`：应返回 `{"ok":true,"service":"clash-vercel-merger"}`。如果健康检查也 500，查看 Vercel Project → Logs 中对应的运行时异常，检查 Node.js 版本和 Root Directory。
+4. 如果 `/api/health` 正常，但 `/api/status` 不正常，先在 Vercel 设置 `BASE_CONFIG_URL`、`SUBSCRIPTION_URL`、`FEED_KEY` 并 Redeploy；再从页面输入 FEED_KEY，点击“检查 Vercel 默认配置”。上游文件 403/超时会返回可读 JSON 错误。
+5. 如 `/api/status` 返回 `FUNCTION_INVOCATION_FAILED`，通常属于函数加载/依赖/运行时错误，检查日志中是否有 `Cannot find package 'yaml'`、`ERR_MODULE_NOT_FOUND` 或 `TypeError`。确保 `yaml` 出现在根目录 `package.json` 的 `dependencies` 内。
+
+不要发送 Vercel 环境变量的值或任何含 token 的完整订阅 URL；排错只需日志中不含凭据的错误类型和堆栈。

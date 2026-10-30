@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildConfig, checkSourceUrl, fetchRemote, loadEnvironment, sameSecret } from '../src/server.js';
+import { buildConfig, checkSourceUrl, fetchRemote, loadEnvironment, sameSecret } from '../src/clash-handler.js';
 
 const base = `dns: {enable: true}
 proxies: []

@@ -1,4 +1,4 @@
-export const UI_HTML = String.raw`<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
@@ -85,4 +85,4 @@ $('download').onclick=()=>{
 $('copy').onclick=async()=>{if(!$('feedurl').value){notice('message','请先输入 FEED_KEY。',false);return;}
  try{await navigator.clipboard.writeText($('feedurl').value);notice('message','已复制订阅地址。',true);}catch{ $('feedurl').select();document.execCommand('copy');notice('message','请从输入框复制订阅地址。',true); }
 };
-</script></body></html>`;
+</script></body></html>

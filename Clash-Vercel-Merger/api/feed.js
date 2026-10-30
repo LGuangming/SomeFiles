@@ -1,2 +1,2 @@
-import { handler } from '../src/server.js';
+import { handler } from '../src/clash-handler.js';
 export default (req, res) => handler(req, res, 'feed');

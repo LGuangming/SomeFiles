@@ -9,8 +9,5 @@
   },
   "dependencies": {
     "yaml": "^2.8.1"
-  },
-  "devDependencies": {
-    "vercel": "^48.0.0"
   }
 }

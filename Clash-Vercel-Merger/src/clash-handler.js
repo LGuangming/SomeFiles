@@ -1,6 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
 import { mergeClash, MergeError, validateBaseYaml } from './merge.js';
-import { UI_HTML } from './ui.js';
 
 const MAX_BASE_BYTES = 1_500_000;
 const MAX_SOURCE_BYTES = 3_000_000;
@@ -142,14 +141,6 @@ export function outputYaml(res, yaml, userInfo = '') {
 }
 
 export async function handler(req, res, action) {
-  if (action === 'home') {
-    if (req.method !== 'GET') return error(res, 405, 'Method Not Allowed');
-    res.writeHead(200, {
-      ...headers, 'Content-Type': 'text/html; charset=utf-8',
-      'Content-Security-Policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'"
-    });
-    return res.end(UI_HTML);
-  }
   if (!sameSecret(getKey(req, action), process.env.FEED_KEY)) return error(res, 401, '访问密钥无效。');
   if (req.method === 'POST') {
     const origin = req.headers.origin;
