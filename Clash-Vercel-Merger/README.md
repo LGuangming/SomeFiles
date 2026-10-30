@@ -1,29 +1,68 @@
-# Clash / Mihomo 地区节点合并器（Vercel）
+# Clash / Mihomo 地区代理节点合并器（Vercel · 双 URL · 无数据库）
 
-基于你的 Clash YAML 主配置，只提取上游订阅中的 `proxies`，按节点名称中的地区生成 `url-test` 自动测速组，并在现有 `select` 组中追加地区组选项。原有 `DIRECT`、`Proxy`、`Auto`、DNS、规则及其现有顺序保持不变。原有 `Auto`（若是 `url-test`）也会加入新节点。
+使用一个 Vercel 项目把两份 **HTTPS 远程 YAML** 实时合并：
 
-## 部署到 Vercel
+- **主配置模板 URL（`BASE_CONFIG_URL`）**：返回你完整的 Clash / Mihomo YAML，包括 DNS、规则、原节点及原有代理组。
+- **上游节点订阅 URL（`SUBSCRIPTION_URL`）**：返回 Clash YAML，只导入其中的 `proxies`，完全忽略上游规则、DNS、代理组。
+- **`FEED_KEY`**：保护网页操作和 `/sub/:key` 完整配置订阅。
 
-1. 在 Vercel 选择 **Add New → Project → Import Git Repository**。如从 `SomeFiles` 仓库部署，将项目 **Root Directory** 设为 `Clash-Vercel-Merger`；如迁移到独立仓库则使用根目录。
-2. Framework Preset 选择 **Other**（普通 Node.js Serverless Functions，无需构建命令）。Node.js 使用受支持的 LTS 版本。
-3. 在 Vercel Marketplace 添加 **Upstash Redis**，创建 Redis 数据库并连接本项目。把 `UPSTASH_REDIS_REST_URL` 和 `UPSTASH_REDIS_REST_TOKEN` 添加到项目环境变量；若旧版集成提供 `KV_REST_API_URL`、`KV_REST_API_TOKEN`，程序也兼容。
-4. 在 **Project Settings → Environment Variables** 增加两个**不同**、不少于 24 字符的随机值：`ADMIN_KEY` 和 `FEED_KEY`。建议分别使用 `openssl rand -hex 32` 生成。
-5. **Redeploy** 使环境变量生效，打开项目域名，输入 `ADMIN_KEY` 连接；输入 `FEED_KEY` 用于生成远程订阅地址。
-6. 在页面上传你的原始 YAML，填写上游 Clash 订阅 URL，点击预览，然后下载或将生成的 `https://YOUR_DOMAIN/sub/YOUR_FEED_KEY` 导入 Clash/Mihomo 订阅。
+**不需要 Redis、KV、云数据库，也不需要把原 YAML 编码写进环境变量。** 每次 Clash 客户端更新订阅时，Vercel 同时抓取这两个 URL 并生成合并 YAML。
 
-> **重要**：项目代码不包含你的 YAML、订阅令牌或私密凭据，不要把它们放到仓库里。**FEED_KEY 对应的订阅链接可读出完整代理配置，必须保密**。原 YAML 包括控制器和认证信息，建议轮换其中已暴露的口令，并检查对外监听设置。
+## 一、在 Vercel 部署
 
-## 合并逻辑
+1. Vercel → **Add New → Project** → 选择 GitHub 仓库 `LGuangming/SomeFiles`。
+2. 将 **Root Directory** 指向 `Clash-Vercel-Merger`；Framework Preset 选 **Other**。
+3. 在 **Settings → Environment Variables** 填写下面三个值，应用到 Production：
 
-- 保留主配置的完整 `rules` / `dns` / `rule-providers` 等字段。
-- 仅读取上游 Clash YAML 的 `proxies`；忽略上游 `rules` / `proxy-groups`。
-- 按名字中的国家、地名、地区代码或国旗识别地区；无法识别的加入 `其他地区`。这是名称匹配，并非 IP 地理定位。
-- 每个地区建独立 `url-test` 组，继承原 `Auto` 的测速网址、间隔及容差。
-- 原 `select` 组追加新地区组选项，保留原有所有成员及顺序；原 `Auto`（如为 `url-test`）追加节点。
-- 原节点保留，新节点按参数去重；重名时自动重命名，避免覆盖已有组。
-- 生成后核验所有原 `select` 组前缀成员、`rules` 和 `dns` 未被改动。
+| 变量名 | 内容 |
+| --- | --- |
+| `BASE_CONFIG_URL` | 完整主配置 YAML 的 **HTTPS 原始文件地址**，例如 `https://raw.githubusercontent.com/USER/REPO/main/config.yaml` |
+| `SUBSCRIPTION_URL` | 节点提供商的完整 **Clash YAML 订阅地址**（可以包含其 token 参数） |
+| `FEED_KEY` | 自选的强随机值，最少 24 字符，推荐运行 `openssl rand -hex 32` |
 
-## 本地测试
+4. Deploy / Redeploy。环境变量修改后需要新部署才生效。
+5. 打开 Vercel 网站，在网页输入 `FEED_KEY`，点击 **检查 Vercel 默认配置**。可以选择填入两个临时 URL 做预览；不填则从环境变量读取。
+6. 把 `https://你的Vercel域名/sub/你的FEED_KEY` 加入 Clash/Mihomo 的远程配置订阅。
+
+**注意：** 如果主配置托管在 GitHub，必须填写 `raw.githubusercontent.com` 原始内容链接，而不是 `github.com/.../blob/...` 的网页链接。带有认证信息、订阅 token、节点 UUID 等秘密的主 YAML **不应放在公开 GitHub 仓库**。主配置 URL 需要能从 Vercel 直接读取；若使用私有仓库或需要授权头的地址，当前版本无法直接访问。可使用专门的受控/签名 HTTPS 直链。
+
+## 二、网页预览和下载
+
+网页可以直接使用环境变量定义的两个 URL，也可以在界面临时输入：
+
+- 主配置 URL；或选择上传本地 YAML（二者选一）；
+- 节点订阅 URL。
+
+点击 **远程读取并预览** 后获取地区统计和合并后的 YAML，支持直接下载。以上临时输入只用于这一请求，**不会改变** `/sub/:key` 固定订阅生成时读取的环境变量，且不写入任何数据库。
+
+## 三、保留和合并规则
+
+- 保留主配置的所有 `rules`、`dns`、`rule-providers`、既有代理节点和代理组，原有组成员顺序保持不变。
+- 上游仅导入其 `proxies`；重复节点去重，重名节点自动改名。
+- 根据节点名/旗帜推断国家或地区，生成 `url-test` 自动测速组；无法识别的归入“其他地区”。这不是按节点真实出口 IP 地理定位。
+- 原 `Auto` 为 `url-test` 时追加新节点；已有的 `select` 组只在末尾增加地区组，**已有的 `DIRECT`、`Proxy`、`Auto` 和其他成员不被删除或重排**。
+- 合并后检查原始 DNS、规则和所有已有组成员未被更改；不通过检查时拒绝输出。
+
+## 四、接口
+
+| 地址 | 功能 | 验证 |
+| --- | --- | --- |
+| `/` | 网页界面 | 无（但数据 API 需要鉴权） |
+| `GET /api/status` | 验证环境变量中的主配置，并显示基本统计 | `Authorization: Bearer FEED_KEY` |
+| `POST /api/merge` | 临时 URL/上传预览，返回 YAML 和统计 | `Authorization: Bearer FEED_KEY` |
+| `GET /api/download` | 直接下载默认合并配置 | `Authorization: Bearer FEED_KEY` |
+| `GET /sub/:key` | 客户端自动更新的完整 YAML | URL 中携带 `FEED_KEY` |
+
+## 五、项目代码
+
+- `src/server.js`：两个远程 YAML 获取、输入限制、鉴权及 API。
+- `src/merge.js`：节点去重、地区识别、YAML 无损优先合并及校验。
+- `src/ui.js`：中文静态网页。
+- `api/`：Vercel Node.js Functions 路由。
+- `test/`：自动测试。
+- `vercel.json`：网页和 `/sub/:key` 路由重写。
+
+本地验证：
 
 ```bash
 npm install
@@ -31,17 +70,13 @@ npm test
 npx vercel dev
 ```
 
-将 `.env.example` 复制到 `.env.local` 并填入真实环境变量；不要将 `.env.local` 提交到 GitHub。使用 `vercel dev` 时，也可通过 Vercel CLI 同步项目环境变量。
+可参考 `.env.example` 配置本地 `.env.local`，不要将真实密钥提交到 Git。
 
-## 文件结构
+## 六、安全与限制
 
-- `api/*.js`：Vercel Functions 的 HTTP 端点
-- `src/server.js`：鉴权、Upstash 存储、上游订阅拉取和接口逻辑
-- `src/merge.js`：YAML 合并、地区分组和一致性校验
-- `src/ui.js`：中文网页管理界面
-- `vercel.json`：页面和 `/sub/:key` 地址路由
-- `test/*.test.js`：节点分类、合并保护测试
-
-## 安全提示
-
-后台管理和远程订阅使用不同的密钥。Upstash 存储 YAML、订阅 URL 等敏感内容；不要公开 Redis 令牌。首次配置与订阅 URL 均由你的网页通过 HTTPS 上传保存，不嵌入源码。上游服务器可能拒绝 Vercel 数据中心的请求；该程序只支持上游能返回 `proxies` 数组的 Clash YAML，不支持 Base64 分享链接。每次客户端访问 `/sub/:key` 都会实时抓取上游并生成完整文件，因此速度和可靠性依赖上游服务。
+1. **完整订阅 URL 是敏感凭证**：持有它就能下载包含节点详情、认证配置的完整 YAML。不要公开发给他人，不要贴到 GitHub README。
+2. **主配置私密性**：如果原始模板中有 `secret`、`authentication` 等字段，把它放到公开的 GitHub Raw 等于公开这些凭证。建议轮换之前暴露过的控制器口令，并避免对公网开放控制端口。
+3. 只支持可直接 GET 的 **HTTPS** Clash YAML；私有 GitHub 仓库默认无法由此工具匿名获取，带 Authorization Header 的来源需要后续扩展。
+4. 非 YAML 的 Base64 分享链接、订阅转换页面、仅有 `proxy-providers` 的文件不受支持。
+5. 远程文件必须能从 Vercel 出站网络访问；源站若限制地域/IP，可能出现 403、超时等错误。单次请求受到 Vercel Functions 时长与响应大小限制。
+6. 当前项目不保存上传内容，不提供网页上“永久保存设置”的功能；长期订阅使用 Vercel 环境变量中的两个 URL。

@@ -2,12 +2,8 @@ import { timingSafeEqual } from 'node:crypto';
 import { mergeClash, MergeError, validateBaseYaml } from './merge.js';
 import { UI_HTML } from './ui.js';
 
-export const BASE_KEY = 'clash-merger:private:base';
-export const SOURCE_KEY = 'clash-merger:private:source_url';
-export const FILENAME_KEY = 'clash-merger:private:base_name';
 const MAX_BASE_BYTES = 1_500_000;
 const MAX_SOURCE_BYTES = 3_000_000;
-
 const headers = {
   'Cache-Control': 'no-store, private, max-age=0',
   'X-Content-Type-Options': 'nosniff',
@@ -28,9 +24,9 @@ export function sameSecret(a, b) {
   return aa.length === bb.length && timingSafeEqual(aa, bb);
 }
 
-function authorized(req) {
-  const raw = req.headers.authorization || '';
-  return sameSecret(raw.replace(/^Bearer\s+/i, ''), process.env.ADMIN_KEY);
+function getKey(req, action) {
+  if (action === 'feed') return typeof req.query?.key === 'string' ? req.query.key : '';
+  return String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
 }
 
 export function checkSourceUrl(raw) {
@@ -44,10 +40,17 @@ export function checkSourceUrl(raw) {
   return target.toString();
 }
 
+export function loadEnvironment() {
+  const baseUrl = process.env.BASE_CONFIG_URL;
+  const sourceUrl = process.env.SUBSCRIPTION_URL;
+  if (!baseUrl) throw new MergeError('未设置 BASE_CONFIG_URL（主配置远程地址）。', 500);
+  if (!sourceUrl) throw new MergeError('未设置 SUBSCRIPTION_URL（节点订阅地址）。', 500);
+  return { baseUrl: checkSourceUrl(baseUrl), sourceUrl: checkSourceUrl(sourceUrl) };
+}
+
 async function readBody(req, maxBytes) {
   if (Number(req.headers['content-length'] || 0) > maxBytes) throw new MergeError('上传内容过大。', 413);
-  // Vercel may pre-parse application/json into req.body before the handler runs.
-  // Accept both its request helper and an unconsumed Node.js request stream.
+  // Vercel may pre-parse JSON bodies; handle both that and Node request streams.
   let parsed;
   try { parsed = req.body; } catch { throw new MergeError('请求正文解析失败。'); }
   if (parsed !== undefined && parsed !== null) {
@@ -55,8 +58,7 @@ async function readBody(req, maxBytes) {
     if (buf.length > maxBytes) throw new MergeError('上传内容过大。', 413);
     return new TextDecoder('utf-8', { fatal: true }).decode(buf);
   }
-  let size = 0;
-  const chunks = [];
+  let size = 0; const chunks = [];
   for await (const chunk of req) {
     const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     size += buf.length;
@@ -66,31 +68,7 @@ async function readBody(req, maxBytes) {
   return new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks));
 }
 
-function storageEnv() {
-  const endpoint = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-  if (!endpoint || !token || !/^https:\/\//.test(endpoint)) throw new MergeError('未配置 Upstash Redis 环境变量。', 500);
-  return { endpoint: endpoint.replace(/\/+$/, ''), token };
-}
-
-export async function redisCommands(commands) {
-  const { endpoint, token } = storageEnv();
-  const response = await fetch(endpoint + (commands.length > 1 ? '/pipeline' : ''), {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(commands.length > 1 ? commands : commands[0]),
-    signal: AbortSignal.timeout(10000)
-  });
-  if (!response.ok) throw new MergeError('私有存储读取失败。', 502);
-  const values = await response.json();
-  const results = Array.isArray(values) ? values : [values];
-  if (results.length !== commands.length || results.some(item => Object.hasOwn(item, 'error'))) {
-    throw new MergeError('私有存储处理失败。', 502);
-  }
-  return results.map(item => item.result);
-}
-
-export async function fetchSubscription(url) {
+export async function fetchRemote(url, label, maxBytes) {
   let current = checkSourceUrl(url);
   for (let i = 0; i <= 3; i++) {
     let response;
@@ -100,39 +78,55 @@ export async function fetchSubscription(url) {
         signal: AbortSignal.timeout(18000),
         headers: { 'User-Agent': 'clash.meta', Accept: 'application/yaml, text/yaml, text/plain, */*' }
       });
-    } catch { throw new MergeError('无法访问上游订阅服务器，请确认源站允许 Vercel 请求。', 502); }
-    if ([301,302,303,307,308].includes(response.status)) {
+    } catch { throw new MergeError(`${label}连接失败，请确认 URL 可从 Vercel 访问。`, 502); }
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
       const redirect = response.headers.get('location');
-      if (!redirect) throw new MergeError('订阅服务器跳转缺少地址。', 502);
+      if (!redirect) throw new MergeError(`${label}的跳转缺少 Location。`, 502);
       current = checkSourceUrl(new URL(redirect, current).toString());
       continue;
     }
-    if (!response.ok) throw new MergeError(`订阅服务器返回 HTTP ${response.status}。`, 502);
-    if (Number(response.headers.get('content-length') || 0) > MAX_SOURCE_BYTES) throw new MergeError('订阅大小超过 3MB。', 413);
-    if (!response.body) throw new MergeError('订阅内容为空。', 502);
+    if (!response.ok) throw new MergeError(`${label}返回 HTTP ${response.status}。`, 502);
+    if (Number(response.headers.get('content-length') || 0) > maxBytes) throw new MergeError(`${label}内容过大。`, 413);
+    if (!response.body) throw new MergeError(`${label}内容为空。`, 502);
     const reader = response.body.getReader();
     const chunks = []; let size = 0;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > MAX_SOURCE_BYTES) { await reader.cancel().catch(() => {}); throw new MergeError('订阅大小超过 3MB。', 413); }
+      if (size > maxBytes) { await reader.cancel().catch(() => {}); throw new MergeError(`${label}内容超过限制。`, 413); }
       chunks.push(value);
     }
-    const bytes = new Uint8Array(size);
-    let offset = 0;
+    const bytes = new Uint8Array(size); let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
-    return { text: new TextDecoder('utf-8', { fatal: true }).decode(bytes), userInfo: response.headers.get('subscription-userinfo') || '' };
+    let text;
+    try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+    catch { throw new MergeError(`${label}不是有效的 UTF-8 YAML 文本。`, 502); }
+    return { text, userInfo: response.headers.get('subscription-userinfo') || '' };
   }
-  throw new MergeError('上游订阅跳转次数超过 3 次。', 502);
+  throw new MergeError(`${label}跳转次数超过 3 次。`, 502);
 }
 
-export async function buildConfig() {
-  const [base, source] = await redisCommands([['GET', BASE_KEY], ['GET', SOURCE_KEY]]);
-  if (!base) throw new MergeError('尚未上传主配置 YAML。');
-  if (!source) throw new MergeError('尚未保存节点订阅 URL。');
-  const upstream = await fetchSubscription(source);
-  return { ...mergeClash(base, [upstream.text]), userInfo: upstream.userInfo };
+export async function buildConfig({ baseYaml, baseUrl, sourceUrl } = {}) {
+  // Explicit URL overrides work only for the current request and are not saved.
+  // Permanent /sub/:key always reads both URLs from the private Vercel environment.
+  if (baseYaml !== undefined && baseUrl !== undefined) {
+    throw new MergeError('请在上传 YAML 和主配置 URL 之间选择一种方式。');
+  }
+  baseUrl ??= process.env.BASE_CONFIG_URL;
+  sourceUrl ??= process.env.SUBSCRIPTION_URL;
+  if (baseYaml === undefined && !baseUrl) throw new MergeError('请提供主配置 URL 或上传 YAML。', 400);
+  if (!sourceUrl) throw new MergeError('请提供节点订阅 URL。', 400);
+  if (baseYaml !== undefined) {
+    if (typeof baseYaml !== 'string' || Buffer.byteLength(baseYaml, 'utf8') > MAX_BASE_BYTES) throw new MergeError('主配置格式或大小无效。');
+    validateBaseYaml(baseYaml);
+  }
+  const [base, upstream] = await Promise.all([
+    baseYaml === undefined ? fetchRemote(baseUrl, '主配置', MAX_BASE_BYTES) : Promise.resolve({ text: baseYaml }),
+    fetchRemote(sourceUrl, '节点订阅', MAX_SOURCE_BYTES)
+  ]);
+  validateBaseYaml(base.text);
+  return { ...mergeClash(base.text, [upstream.text]), userInfo: upstream.userInfo };
 }
 
 export function outputYaml(res, yaml, userInfo = '') {
@@ -150,47 +144,41 @@ export function outputYaml(res, yaml, userInfo = '') {
 export async function handler(req, res, action) {
   if (action === 'home') {
     if (req.method !== 'GET') return error(res, 405, 'Method Not Allowed');
-    res.writeHead(200, { ...headers, 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'" });
+    res.writeHead(200, {
+      ...headers, 'Content-Type': 'text/html; charset=utf-8',
+      'Content-Security-Policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'"
+    });
     return res.end(UI_HTML);
   }
-  if (action === 'feed') {
-    if (req.method !== 'GET') return error(res, 405, 'Method Not Allowed');
-    const key = typeof req.query?.key === 'string' ? req.query.key : '';
-    if (!sameSecret(key, process.env.FEED_KEY)) return error(res, 401, '订阅令牌无效。');
-  } else if (!authorized(req)) {
-    return error(res, 401, '管理密钥无效。');
-  }
+  if (!sameSecret(getKey(req, action), process.env.FEED_KEY)) return error(res, 401, '访问密钥无效。');
   if (req.method === 'POST') {
     const origin = req.headers.origin;
     const proto = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers['x-forwarded-host'] || req.headers.host;
-    if (origin && origin !== `${proto}://${host}`) return error(res, 403, '跨站写入被拒绝。');
+    if (origin && origin !== `${proto}://${host}`) return error(res, 403, '跨站访问被拒绝。');
   }
   try {
     if (action === 'status' && req.method === 'GET') {
-      const [base, source, name] = await redisCommands([['GET', BASE_KEY], ['GET', SOURCE_KEY], ['GET', FILENAME_KEY]]);
-      return reply(res, 200, { hasBase: !!base, baseName: name || '主配置.yaml', baseStats: base ? validateBaseYaml(base) : null, hasSource: !!source, sourceHost: source ? new URL(source).hostname : '' });
+      // Do not return the sensitive base YAML or upstream subscription token.
+      const { baseUrl, sourceUrl } = loadEnvironment();
+      const base = await fetchRemote(baseUrl, '主配置', MAX_BASE_BYTES);
+      return reply(res, 200, {
+        configured: true,
+        baseStats: validateBaseYaml(base.text),
+        baseHost: new URL(baseUrl).hostname,
+        sourceHost: new URL(sourceUrl).hostname
+      });
     }
-    if (action === 'base' && req.method === 'POST') {
-      const base = await readBody(req, MAX_BASE_BYTES);
-      const stats = validateBaseYaml(base);
-      let name = '主配置.yaml';
-      try { name = decodeURIComponent(req.headers['x-filename'] || name); } catch { /* invalid filename */ }
-      name = name.replace(/[^\w\u4e00-\u9fa5.() -]/g, '_').slice(0, 100);
-      await redisCommands([['SET', BASE_KEY, base], ['SET', FILENAME_KEY, name]]);
-      return reply(res, 200, { ok: true, name, ...stats });
-    }
-    if (action === 'source' && req.method === 'POST') {
-      const text = await readBody(req, 10000);
-      let parsed;
-      try { parsed = JSON.parse(text); } catch { throw new MergeError('请求 JSON 格式不正确。'); }
-      const source = checkSourceUrl(parsed?.url);
-      await redisCommands([['SET', SOURCE_KEY, source]]);
-      return reply(res, 200, { ok: true, sourceHost: new URL(source).hostname });
-    }
-    if (action === 'preview' && req.method === 'GET') {
-      const { stats } = await buildConfig();
-      return reply(res, 200, { ok: true, ...stats });
+    if (action === 'merge' && req.method === 'POST') {
+      const text = await readBody(req, MAX_BASE_BYTES + 20_000);
+      let body;
+      try { body = JSON.parse(text); } catch { throw new MergeError('请求 JSON 格式不正确。'); }
+      if (!body || typeof body !== 'object' || Array.isArray(body)) throw new MergeError('请求参数不正确。');
+      if (body.baseYaml !== undefined && typeof body.baseYaml !== 'string') throw new MergeError('主配置必须为 YAML 文本。');
+      if (body.baseUrl !== undefined && typeof body.baseUrl !== 'string') throw new MergeError('主配置 URL 必须为字符串。');
+      if (body.sourceUrl !== undefined && typeof body.sourceUrl !== 'string') throw new MergeError('订阅 URL 必须为字符串。');
+      const { yaml, stats } = await buildConfig({ baseYaml: body.baseYaml, baseUrl: body.baseUrl, sourceUrl: body.sourceUrl });
+      return reply(res, 200, { ok: true, stats, yaml });
     }
     if ((action === 'download' || action === 'feed') && req.method === 'GET') {
       const { yaml, userInfo } = await buildConfig();
@@ -199,7 +187,6 @@ export async function handler(req, res, action) {
     return error(res, 405, 'Method Not Allowed');
   } catch (e) {
     if (e instanceof MergeError) return error(res, e.status || 400, e.message);
-    // Never leak stored YAML, credentials, upstream subscription URL or stack traces.
     return error(res, 500, '服务器内部错误，请检查 Vercel Functions 日志和环境变量。');
   }
 }
