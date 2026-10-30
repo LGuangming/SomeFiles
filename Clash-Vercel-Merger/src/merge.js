@@ -52,7 +52,7 @@ export function isSubscriptionInfoNode(name) {
   const value = String(name || '').normalize('NFKC').replace(/[\s\u200b-\u200d\ufeff]/g, '');
   // Providers sometimes disguise a quota notice as a normal SS/VLESS proxy,
   // including a flag (e.g. 🇬🇧 剩余流量 12 GB). Don't classify it as a country node.
-  return /(?:剩余|剩餘)(?:套餐)?流量|流量(?:剩余|剩餘)|(?:剩余|剩餘)[:：]?[\d.]+(?:GB|MB|TB|G|M|T)\b|(?:remaining|left|available)(?:traffic|data)|(?:traffic|data)(?:remaining|left)/i.test(value);
+  return /(?:剩余|剩餘)(?:套餐)?流量|流量(?:剩余|剩餘)|(?:剩余|剩餘)[:：]?[\d.]+(?:GB|MB|TB|G|M|T)\b|(?:remaining|left|available)(?:traffic|data)|(?:traffic|data)(?:remaining|left)|距(?:离)?(?:下次|下一次)?(?:套餐|流量)?(?:重置|重設|重设|刷新)|(?:下次|下一次)(?:套餐|流量)?(?:重置|重設|重设|刷新)(?:剩余|剩餘|还有|還有|还剩|還剩|倒计时|倒計時)/i.test(value);
 }
 
 function parseYaml(text, label) {

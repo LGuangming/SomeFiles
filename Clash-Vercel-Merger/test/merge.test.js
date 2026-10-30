@@ -87,3 +87,35 @@ test('when all subscription entries are quota notices, reject an empty regional 
 `;
   assert.throws(() => mergeClash(original, [onlyQuota]), /没有可导入的代理节点/);
 });
+
+test('reset countdown notices are filtered, including UK-flagged entries', () => {
+  const notices = [
+    '🇬🇧 距离下次重置剩余 15 天',
+    '距离下次重置剩余：5天',
+    '距下次重置剩余 10 小时',
+    '距离下次流量重置还有 2天',
+    '下次重置剩餘 3日',
+    '🇬🇧 下次套餐重置倒计时 6天'
+  ];
+  for (const name of notices) assert.equal(isSubscriptionInfoNode(name), true, name);
+  for (const name of ['🇬🇧 UK London 01', '🇬🇧 UK London 02', '香港 03', '英国高速中继']) {
+    assert.equal(isSubscriptionInfoNode(name), false, name);
+  }
+  const sourceWithCountdown = `proxies:
+  - {name: '🇬🇧 距离下次重置剩余 15 天', type: ss, server: notice1.test, port: 443}
+  - {name: '距离下次流量重置还有 2天', type: ss, server: notice2.test, port: 443}
+  - {name: '🇬🇧 London 01', type: ss, server: uk1.test, port: 443}
+`;
+  const merged = mergeClash(original, [sourceWithCountdown]);
+  const parsed = YAML.parse(merged.yaml);
+  assert.equal(merged.stats.sourceNodes, 3);
+  assert.equal(merged.stats.filteredInfoNodes, 2);
+  assert.equal(merged.stats.importedNodes, 1);
+  assert.equal(merged.stats.regionGroups.length, 1);
+  assert.equal(merged.stats.regionGroups[0].region, '英国');
+  assert.deepEqual(parsed['proxy-groups'].find(g => g.name === '英国').proxies, ['🇬🇧 London 01']);
+  assert.equal(parsed.proxies.some(p => p.name.includes('重置')), false);
+  assert.equal(parsed['proxy-groups'][0].proxies.some(p => p.includes('重置')), false);
+  assert.deepEqual(parsed.rules, YAML.parse(original).rules);
+  assert.deepEqual(parsed.dns, YAML.parse(original).dns);
+});
